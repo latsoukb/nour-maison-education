@@ -2,8 +2,7 @@
   "use strict";
 
   const RENTREE_DATE = new Date("2026-09-01T08:00:00+00:00");
-  const FORM_ENDPOINT = "https://formsubmit.co/ajax/infos@nour-impact.org";
-  const FORM_RECIPIENT = "infos@nour-impact.org";
+  const WHATSAPP_NUMBER = "221778828787";
 
   /* ─── Header scroll ─── */
   const header = document.getElementById("header");
@@ -70,12 +69,29 @@
 
   document.querySelectorAll(".reveal").forEach((el) => observer.observe(el));
 
-  /* ─── Contact form → FormSubmit.co ─── */
+  /* ─── Contact form → WhatsApp ─── */
   const form = document.getElementById("notify-form");
   const success = document.getElementById("form-success");
   const error = document.getElementById("form-error");
 
-  form.addEventListener("submit", async (e) => {
+  function buildWhatsAppMessage(name, email, phone, message) {
+    const lines = [
+      "Bonjour, je souhaite être informé(e) de l'ouverture de Nour Maison d'Éducation.",
+      "",
+      `Nom : ${name}`,
+      `Téléphone : ${phone}`,
+    ];
+
+    if (email) {
+      lines.push(`E-mail : ${email}`);
+    }
+
+    lines.push("", "Message :", message || "Demande d'inscription à la liste d'attente.");
+
+    return lines.join("\n");
+  }
+
+  form.addEventListener("submit", (e) => {
     e.preventDefault();
 
     const btn = form.querySelector('button[type="submit"]');
@@ -84,53 +100,33 @@
 
     success.hidden = true;
     error.hidden = true;
+
+    const data = new FormData(form);
+    const name = data.get("name").trim();
+    const email = (data.get("email") || "").trim();
+    const phone = data.get("phone").trim();
+    const message = (data.get("message") || "").trim();
+
+    if (!name || !phone) {
+      error.textContent = "Veuillez renseigner votre nom et votre numéro WhatsApp.";
+      error.hidden = false;
+      return;
+    }
+
     btnText.hidden = true;
     btnLoading.hidden = false;
     btn.disabled = true;
 
-    const data = new FormData(form);
-    const name = data.get("name").trim();
-    const email = data.get("email").trim();
-    const phone = (data.get("phone") || "").trim();
-    const message = (data.get("message") || "").trim();
+    const text = buildWhatsAppMessage(name, email, phone, message);
+    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
 
-    const payload = {
-      name,
-      email,
-      phone: phone || "Non renseigné",
-      message: message || "Demande d'inscription à la liste d'attente",
-      _subject: `Liste d'attente — ${name}`,
-      _replyto: email,
-      _template: "table",
-      _captcha: "false",
-    };
+    window.open(url, "_blank", "noopener,noreferrer");
 
-    try {
-      const response = await fetch(FORM_ENDPOINT, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+    success.hidden = false;
+    form.reset();
 
-      if (!response.ok) {
-        throw new Error("Erreur réseau");
-      }
-
-      form.reset();
-      success.hidden = false;
-    } catch (err) {
-      error.textContent =
-        "L'envoi a échoué. Écrivez-nous directement à " +
-        FORM_RECIPIENT +
-        " ou via WhatsApp.";
-      error.hidden = false;
-    } finally {
-      btnText.hidden = false;
-      btnLoading.hidden = true;
-      btn.disabled = false;
-    }
+    btnText.hidden = false;
+    btnLoading.hidden = true;
+    btn.disabled = false;
   });
 })();
