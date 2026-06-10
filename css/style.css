@@ -97,24 +97,27 @@ button, input, textarea {
 
 .logo-img {
   display: block;
-  height: 52px;
+  height: 56px;
   width: auto;
   object-fit: contain;
 }
 
 .logo-img--footer {
-  height: 56px;
-  padding: 0.35rem 0.6rem;
-  background: var(--color-white);
-  border-radius: var(--radius-sm);
+  height: 72px;
   object-fit: contain;
+  background: var(--color-white);
+  padding: 0.4rem 0.65rem;
+  border-radius: var(--radius-sm);
 }
 
 .hero-logo {
   display: block;
-  height: clamp(80px, 14vw, 120px);
+  height: clamp(100px, 18vw, 160px);
   width: auto;
   margin-bottom: 2rem;
+  background: var(--color-white);
+  padding: 0.65rem 1rem;
+  border-radius: var(--radius-md);
 }
 
 .nav-links {
